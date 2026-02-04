@@ -54,48 +54,35 @@ int initSDL() {
 // Function to handle ball movement and collision
 void moveBall() {
 
-    // 1) Move the ball (Position += Velocity)
-    ball_x += ball_dx;
-    ball_y += ball_dy;
-
-    // 2) Check for collision with walls (Left/Right)
+    //TODO: Move the ball
+	ball_x += ball_dx;
+	ball_y += ball_dy;
+	// this should move the ball
+    
+    // Check for collision with walls (NOT bottom walls)
     if (ball_x <= 0 || ball_x + BALL_SIZE >= WINDOW_WIDTH) {
-        ball_dx = -ball_dx;
+        ball_dx = -ball_dx; //bounch off left/right walls
     }
-
-    // 3) Check for collision with ceiling (Top)
     if (ball_y <= 0) {
-        ball_dy = -ball_dy;
+        ball_dy = -ball_dy; // bounch off roof
     }
 
-    // 4) Check for collision with paddle region (Bottom)
-    // Want to detect if ball overlaps paddle rectangle
-    // Ball rectangle: [ball_x, ball_y, BALL_SIZE, BALL_SIZE]
-    // Paddle rectangle: [paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT]
-    if (ball_y + BALL_SIZE >= paddle_y &&
-        ball_y <= paddle_y + PADDLE_HEIGHT &&
-        ball_x + BALL_SIZE >= paddle_x &&
-        ball_x <= paddle_x + PADDLE_WIDTH) {
+    // Check for collision with paddle
+    // Complete the missing conditions for the if statement
+	// Padle collison logic
+	// is the ball low enough to hit the paddle
 
-        // If the ball hit the paddle (Coming down onto it), bounce
-        if (ball_dy > 0) {
-            // Reverse y direction of the ball
-	    ball_dy = -ball_dy;
+    if (ball_y + BALL_SIZE >= paddle_y){
 
-	    // Prevent ball from sticking inside paddle
-	    ball_y = paddle_y - BALL_SIZE;
+	// if TRUE, the ball is either touching or inside the paddle	
 
+	//is the ball touching the paddle horizontally
+        if (ball_x + BALL_SIZE >= paddle_x && ball_x <= paddle_x + PADDLE_WIDTH) {
+		// if TRUE the ball is hitting the paddle
+		ball_dy = -ball_dy;
         } else {
-
-            // If somehow it overlaps while moving upward, ignore or still bounce
-            ball_dy = -ball_dy;
-        }
-
-    } else {
-
-        // If ball goes below screen print the message "GAME OVER" in the terminal
-        if (ball_y > WINDOW_HEIGHT) {
-            printf("Game Over\n");
+            // print the message "GAME OVER" in the terminal
+	    printf("GAME OVER\n");
             SDL_DestroyRenderer(renderer);
             SDL_DestroyWindow(window);
             SDL_Quit();
