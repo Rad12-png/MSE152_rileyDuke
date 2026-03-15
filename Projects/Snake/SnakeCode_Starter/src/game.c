@@ -60,8 +60,27 @@ Segment *create_segment(int x, int y) {
  *   - Increment snake.length.
  */
 void snake_add_head(int x, int y) {
-    // TODO: implement
-    (void)x; (void)y;
+    // Create a new segment that will become the new head
+    Segment *new_head = create_segment(x,y);
+
+    // If memory allocation failed, stop
+    if (new_head == NULL) {
+        return;
+    }
+
+    // Link the new node to the current head
+    new_head->next = snake.head;
+
+    // Update head to point to the new first node
+    snake.head = new_head;
+
+    // If the snake was empty before, tail must also point to this node
+    if (snake.tail == NULL) {
+        snake.tail = new_head;
+    }
+
+    // One segment was added, so increase length
+    snake.length++;
 }
 
 /*
