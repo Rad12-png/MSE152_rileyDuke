@@ -94,7 +94,37 @@ void snake_add_head(int x, int y) {
  *   - Decrement snake.length.
  */
 void snake_remove_tail(void) {
-    // TODO: implement
+    // If the snake is empty, do nothing
+    if (snake.head == NULL) {
+        return;
+    }
+
+    // If the snake only has one segment
+    if (snake.head ==  snake.tail) {
+        free(snake.head);
+        snake.head = NULL;
+        snake.tail = NULL;
+        snake.length = 0;
+        return;
+    }
+
+    // Traverse the list to find the segment just before the tail
+    Segment *current = snake.head;
+
+    while (current->next != snake.tail) {
+        current = current->next;
+    }
+
+    // Free the current tail
+    free(snake.tail);
+
+    // Update the new tail
+    snake.tail = current;
+    snake.tail->next = NULL;
+
+    // Decrease snake length
+    snake.length--;
+
 }
 
 /*
