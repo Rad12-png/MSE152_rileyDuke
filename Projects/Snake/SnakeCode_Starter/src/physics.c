@@ -35,9 +35,16 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
         // Snake eats food — grow by NOT removing the tail.
         food->is_active = 0;
 
-        // TODO: increment state->score.
-        // TODO: increase difficulty — decrease state->speed_ms (minimum ~60).
-        // TODO: call spawn_food() to place new food.
+        // increment state->score.
+	state->score++;
+
+        // increase difficulty — decrease state->speed_ms (minimum ~60).
+	if (state->speed_ms > 60) {
+	    state->speed_ms -= 5;
+        }
+
+        // call spawn_food() to place new food.
+	spawn_food();
 
         printf("Score: %d\n", state->score);  // temporary — replace with HUD
     } else {
