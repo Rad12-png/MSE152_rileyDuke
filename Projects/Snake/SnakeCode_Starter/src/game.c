@@ -106,7 +106,25 @@ void snake_remove_tail(void) {
  *   - This must leave zero memory leaks (verify with Valgrind).
  */
 void snake_free(void) {
-    // TODO: implement
+    // Start at the head of the linked list
+    Segment *current = snake.head;
+
+    // Walk through the list one node at a time
+    while (current != NULL) {
+        // Save the nest node before freeing the current one
+        Segment *next_node = current->next;
+
+        // Free the current segment
+        free(current);
+
+        // Move to the next segment
+        current = next_node;
+    }
+
+    // After freeing everything, reset the snake to an empty state
+    snake.head = NULL;
+    snake.tail = NULL;
+    snake.length = 0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
