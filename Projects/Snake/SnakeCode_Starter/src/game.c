@@ -26,9 +26,27 @@ InputQueue input_queue;
  *   - Return the pointer. If malloc fails, print an error and return NULL.
  */
 Segment *create_segment(int x, int y) {
-    // TODO: implement
-    (void)x; (void)y;
-    return NULL;
+    // Allocate memory on the heap for one segment node
+    // sizeof(Segment) ensures enough memory for the entire struct
+    Segment *seg = malloc(sizeof(Segment));
+
+    // Always check if malloc failed (return null if failed)
+    if (seg == NULL) {
+        return NULL;
+    }
+
+    // Initialize the position of this segment
+    // Represent grid coordinates of the snake body piece
+    seg->x = x;
+    seg->y = y;
+
+    // Newly created node does not point to another segment yet
+    // Will be later updated when nodes are linked together
+    seg->next = NULL;
+
+    // Return pointer to new segment
+    // Pointer will be used as part of the snake linked list
+    return seg;
 }
 
 /*
