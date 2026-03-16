@@ -24,13 +24,13 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
     
     //checks if the flag wall wrap bit is turned on and if the player has it enabled
     if (state->flags & FLAG_WALL_WRAP) { 
-        if (new_x < 0) new_x = GRID_W - 1; //went off left edge so appear on the right side
-        if (new_x >= GRID_W) new_x = 0; //went off right edge so appear on the left side
-        if (new_y < 0) new_y = GRID_H - 1; //went off top edge so appear on the bottom side
-        if (new_y >= GRID_H) new_y = 0; //went off bottom edge so appear on the top side	
+        if (new_x < 0) new_x = GRID_COLS - 1; //went off left edge so appear on the right side
+        if (new_x >= GRID_COLS) new_x = 0; //went off right edge so appear on the left side
+        if (new_y < 0) new_y = GRID_ROWS - 1; //went off top edge so appear on the bottom side
+        if (new_y >= GRID_ROWS) new_y = 0; //went off bottom edge so appear on the top side	
     } else {
 	//if wall wrap is off check if the new position is outside grid
-        if (new_x < 0 || new_x >= GRID_W || new_y < 0 || new_y >= GRID_H) {
+        if (new_x < 0 || new_x >= GRID_COLS || new_y < 0 || new_y >= GRID_ROWS) {
             state->lives--; //remove a life
             if (state->lives <= 0) { // if lost all lives
                 state->flags |= FLAG_GAME_OVER; //show game over screen
