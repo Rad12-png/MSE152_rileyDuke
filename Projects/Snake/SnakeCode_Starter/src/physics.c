@@ -44,7 +44,21 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
     // TODO: walk the linked list from snake->head to NULL.
     //       If any segment's (x, y) matches (new_x, new_y), the snake has
     //       collided with itself — handle the same way as a wall collision.
-
+    
+    //pointer at the second segment of the snake
+    Segment *current = snake->head->next;
+    while (current != NULL) { //keep looping until it reaches the end of the snake
+        if (current->x == new_x && current->y == new_y) { //check if the head positino matches the segment position
+            state->lives--; //lose a life
+            if (state->lives <= 0) { //if no lives left
+                state->flags |= FLAG_GAME_OVER; //set game over flag
+            } else { //if lives remain
+                reset_snake(); //reset the snake back to the starting position
+            }
+            return;
+        }
+        current = current->next; //move to next segment in the linked list 
+    } 
     // ── Move the snake ────────────────────────────────────────────────────────
     // Add the new head position, then remove the tail (unless eating food).
     snake_add_head(new_x, new_y);
