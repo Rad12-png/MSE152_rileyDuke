@@ -21,12 +21,44 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
     //         - Decrement state->lives.
     //         - If lives reach 0, set FLAG_GAME_OVER.
     //         - Otherwise reset the snake (call reset_snake()).
-
+    
+    //checks if the flag wall wrap bit is turned on and if the player has it enabled
+    if (state->flags & FLAG_WALL_WRAP) { 
+        if (new_x < 0) new_x = GRID_COLS - 1; //went off left edge so appear on the right side
+        if (new_x >= GRID_COLS) new_x = 0; //went off right edge so appear on the left side
+        if (new_y < 0) new_y = GRID_ROWS - 1; //went off top edge so appear on the bottom side
+        if (new_y >= GRID_ROWS) new_y = 0; //went off bottom edge so appear on the top side	
+    } else {
+	//if wall wrap is off check if the new position is outside grid
+        if (new_x < 0 || new_x >= GRID_COLS || new_y < 0 || new_y >= GRID_ROWS) {
+            state->lives--; //remove a life
+            if (state->lives <= 0) { // if lost all lives
+                state->flags |= FLAG_GAME_OVER; //show game over screen
+            } else { //if lives remain
+                reset_snake(); //reset snake to starting position
+            }
+            return;
+        }
+    }
     // ── Self-collision ────────────────────────────────────────────────────────
     // TODO: walk the linked list from snake->head to NULL.
     //       If any segment's (x, y) matches (new_x, new_y), the snake has
     //       collided with itself — handle the same way as a wall collision.
-
+    
+    //pointer at the second segment of the snake
+    Segment *current = snake->head->next;
+    while (current != NULL) { //keep looping until it reaches the end of the snake
+        if (current->x == new_x && current->y == new_y) { //check if the head positino matches the segment position
+            state->lives--; //lose a life
+            if (state->lives <= 0) { //if no lives left
+                state->flags |= FLAG_GAME_OVER; //set game over flag
+            } else { //if lives remain
+                reset_snake(); //reset the snake back to the starting position
+            }
+            return;
+        }
+        current = current->next; //move to next segment in the linked list 
+    } 
     // ── Move the snake ────────────────────────────────────────────────────────
     // Add the new head position, then remove the tail (unless eating food).
     snake_add_head(new_x, new_y);
