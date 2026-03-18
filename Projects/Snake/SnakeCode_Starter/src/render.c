@@ -170,6 +170,27 @@ static void render_hint(SDL_Renderer *r) {
     draw_text_centered(r, font_sm, "then run:  make test",             mid + 28, grey);
 }
 
+// ── Game Over screen ──────────────────────────────────────────────────────────
+
+static void render_game_over(SDL_Renderer *r, const GameState *state) {
+    SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND); //transparency/see thru 
+    SDL_SetRenderDrawColor(r, 0, 0, 0, 180); //set color to black with 180 opacity
+    SDL_Rect overlay = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT}; //create rectangle around window
+    SDL_RenderFillRect(r, &overlay); //draw the overlay on top of the game
+
+    int mid = WINDOW_HEIGHT / 2; //vertical middle for centering text
+    SDL_Color red    = {210,  70,  70, 255}; 
+    SDL_Color white  = {230, 230, 230, 255}; //colors
+    SDL_Color yellow = {220, 200,  50, 255};
+
+    char buf[48]; //buffer to hold score string
+    draw_text_centered(r, font_lg, "GAME OVER",          mid - 60, red); //GAME OVER in red above center
+    snprintf(buf, sizeof(buf), "Final Score: %d", state->score); //format and draw the final score in white
+    draw_text_centered(r, font_sm, buf,                  mid - 10, white); 
+    draw_text_centered(r, font_sm, "Press R to restart", mid + 20, yellow); //draw text
+    draw_text_centered(r, font_sm, "Press ESC to quit",  mid + 44, yellow);
+}
+
 // ── Main render ───────────────────────────────────────────────────────────────
 
 void render_game(SDL_Renderer *renderer, const Snake *snake,
@@ -187,6 +208,9 @@ void render_game(SDL_Renderer *renderer, const Snake *snake,
         render_snake(renderer, snake);
     else
         render_hint(renderer);
+    
+    if (state->flags & FLAG_GAME_OVER)
+        render_game_over(renderer, state); //prints game over screen
 
     SDL_RenderPresent(renderer);
 }

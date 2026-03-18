@@ -280,6 +280,13 @@ void start_game(SDL_Renderer *renderer) {
                 start_game(renderer); //restart game 
                 return;
             }
+            
+            if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) { //if player presses esc
+		snake_free(); //free snake memory
+		render_cleanup(); //clean up all render operations
+		SDL_Quit(); //quit game
+		return;
+		}
         }
         render_game(renderer, &snake, &food, &state); //keep game over screen until input is sent
         SDL_Delay(10); //small delay
