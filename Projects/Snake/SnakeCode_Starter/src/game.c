@@ -209,9 +209,9 @@ void reset_snake(void) {
     //       ends with the head at (GRID_COLS/2, GRID_ROWS/2).
     //
     // Example order:
-    //   snake_add_head(GRID_COLS/2 - 2, GRID_ROWS/2);  // tail
-    //   snake_add_head(GRID_COLS/2 - 1, GRID_ROWS/2);  // middle
-    //   snake_add_head(GRID_COLS/2,     GRID_ROWS/2);  // head
+         snake_add_head(GRID_COLS/2 - 2, GRID_ROWS/2);  // tail (puts segment two tiles from center)
+         snake_add_head(GRID_COLS/2 - 1, GRID_ROWS/2);  // middle (puts segment one tile from center)
+         snake_add_head(GRID_COLS/2,     GRID_ROWS/2);  // head (puts segment in center)
 }
 
 /*
@@ -266,7 +266,31 @@ void start_game(SDL_Renderer *renderer) {
 
     // TODO: display a game-over screen and wait for a restart or quit input.
     //       On restart: call init_game() and re-enter the loop.
-    printf("Game Over! Final score: %d\n", state.score);
+    // printf("Game Over! Final score: %d\n", state.score);
+
+    while (1) { //while true
+        SDL_Event e; //creates variable to hold input 
+        while (SDL_PollEvent(&e)) { //catches if player inputs a key
+            if (e.type == SDL_QUIT) { //checks if player closed window
+                snake_free(); //free memory
+                render_cleanup(); //clean render before quitting
+                return;
+            }
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) { //if player presses R
+                start_game(renderer); //restart game 
+                return;
+            }
+            
+            if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) { //if player presses esc
+		snake_free(); //free snake memory
+		render_cleanup(); //clean up all render operations
+		SDL_Quit(); //quit game
+		return;
+		}
+        }
+        render_game(renderer, &snake, &food, &state); //keep game over screen until input is sent
+        SDL_Delay(10); //small delay
+    }
     snake_free();
     render_cleanup();
 }
