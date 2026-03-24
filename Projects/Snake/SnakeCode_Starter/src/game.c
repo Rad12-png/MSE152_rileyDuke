@@ -10,6 +10,9 @@ Snake      snake;
 Food       food;
 GameState  state;
 InputQueue input_queue;
+// constants for obstacles - rad12
+Obstacle obstacles[MAX_OBSTACLES];
+int num_obstacles = 10;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Linked list operations
@@ -214,16 +217,69 @@ void reset_snake(void) {
          snake_add_head(GRID_COLS/2,     GRID_ROWS/2);  // head (puts segment in center)
 }
 
+// spawn_obstacles - pick random coordinates, checks to ensure the wall doesn't spawn on the snake or other obstacles
+
+void spawn_obstacles(void){
+	int rx = 0, ry = 0;
+	for(int i = 0; i < num_obstacles; i++){
+		int valid = 0;
+		while(!valid){
+			rx = rand() % GRID_COLS;
+			ry = rand() % GRID_ROWS;
+			valid = 1;
+		
+		// don't spawn on the initial snake (middle row)
+		if (ry == GRID_ROWS / 2 && rx >= (GRID_COLS / 2 - 5) && rx <= (GRID_COLS / 2 + 5)){
+			valid = 0;
+			continue;
+		}
+
+		// dont spawn on top of another obstacle
+		for(int j = 0; j < i; j++){
+			if (obstacles[j].x == rx && obstacles[j].y == ry){
+				valid = 0;
+				break;
+			}
+		}
+		}
+	obstacles[i].x = rx;
+	obstacles[i].y = ry;
+	obstacles[i].is_active = 1;
+	}
+}
+
 /*
  * spawn_food — place food at a random unoccupied grid cell.
  *
  * The current implementation picks a random cell without checking for the
  * snake. TODO: improve it so food never spawns inside the snake body.
  */
+
 void spawn_food(void) {
-    food.x = rand() % GRID_COLS;
-    food.y = rand() % GRID_ROWS;
-    food.is_active = 1;
+	int valid = 0;
+	while(!valid){ 
+   		food.x = rand() % GRID_COLS;
+    		food.y = rand() % GRID_ROWS;
+   		valid = 1;
+
+		// check collision with snake
+		for(Segment *s = snake.head; s; s = s->next){
+			if(s->x == food.x && s->y == food.y){
+				valid = 0;
+				break;
+			}
+		}
+		if (!valid) continue;
+
+		// check collision with obstacles
+		for (int i = 0; i < num_obstacles; i++){
+			if(obstacles[i].is_active && obstacles[i].x == food.x && obstacles[i].y == food.y){
+				valid = 0;
+				break;
+			}
+		}
+	}
+	food.is_active = 1;
     // TODO: walk the snake list; if the chosen cell is occupied, pick again.
 }
 
@@ -238,6 +294,7 @@ void init_game(void) {
     snake.length = 0;
     input_queue.head = input_queue.tail = input_queue.count = 0;
     reset_snake();
+    spawn_obstacles();
     spawn_food();
 }
 
@@ -260,7 +317,7 @@ void start_game(SDL_Renderer *renderer) {
             last_update = now;
         }
 
-        render_game(renderer, &snake, &food, &state);
+        render_game(renderer, &snake, &food, &state, obstacles);
         SDL_Delay(10);
     }
 
@@ -288,7 +345,7 @@ void start_game(SDL_Renderer *renderer) {
 		return;
 		}
         }
-        render_game(renderer, &snake, &food, &state); //keep game over screen until input is sent
+        render_game(renderer, &snake, &food, &state, obstacles); //keep game over screen until input is sent
         SDL_Delay(10); //small delay
     }
     snake_free();

@@ -130,6 +130,23 @@ static void render_food(SDL_Renderer *r, const Food *food) {
     SDL_RenderFillRect(r, &rect);
 }
 
+// ── Obstacles ─────────────────────────────────────────────────────────────────
+
+static void render_obstacles(SDL_Renderer *r, const Obstacle *obstacles){
+	SDL_SetRenderDrawColor(r, 100, 100, 100, 225); // gray for walls
+
+	for(int i = 0; i < num_obstacles; i++){
+		if(obstacles[i].is_active){
+			SDL_Rect rect = {
+				obstacles[i].x * CELL_SIZE + 1,
+				HUD_HEIGHT + obstacles[i].y * CELL_SIZE + 1,
+				CELL_SIZE - 2, CELL_SIZE - 2
+			};
+			SDL_RenderFillRect(r, &rect);
+		}
+	}
+}
+
 // ── Snake — walks the linked list ─────────────────────────────────────────────
 
 static void render_snake(SDL_Renderer *r, const Snake *snake) {
@@ -194,7 +211,7 @@ static void render_game_over(SDL_Renderer *r, const GameState *state) {
 // ── Main render ───────────────────────────────────────────────────────────────
 
 void render_game(SDL_Renderer *renderer, const Snake *snake,
-                 const Food *food, const GameState *state) {
+                 const Food *food, const GameState *state, const Obstacle *obstacles) {
     ensure_fonts();
 
     SDL_SetRenderDrawColor(renderer, 15, 15, 15, 255);
@@ -202,6 +219,9 @@ void render_game(SDL_Renderer *renderer, const Snake *snake,
 
     render_grid(renderer);
     render_hud(renderer, state);
+
+    render_obstacles(renderer, obstacles);
+
     render_food(renderer, food);
 
     if (snake->head != NULL)

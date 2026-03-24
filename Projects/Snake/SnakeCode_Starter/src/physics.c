@@ -59,6 +59,21 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
         }
         current = current->next; //move to next segment in the linked list 
     } 
+
+    // ── Obstacle collision ────────────────────────────────────────────────────
+	for(int i = 0; i < num_obstacles; i++){
+		// if the node is registered as an obstacle, and the new x & y values are the same
+		if(obstacles[i].is_active && new_x == obstacles[i].x && new_y == obstacles[i].y){
+			state->lives--;
+			if(state->lives <= 0){
+				state->flags |= FLAG_GAME_OVER;
+			}else{
+				reset_snake();
+			}
+			return;
+		}
+	}
+
     // ── Move the snake ────────────────────────────────────────────────────────
     // Add the new head position, then remove the tail (unless eating food).
     snake_add_head(new_x, new_y);
