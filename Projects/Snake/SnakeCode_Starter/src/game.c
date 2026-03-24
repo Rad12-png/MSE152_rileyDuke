@@ -14,6 +14,37 @@ InputQueue input_queue;
 Obstacle obstacles[MAX_OBSTACLES];
 int num_obstacles = 10;
 
+// Stores the highest score across game sessions
+int high_score = 0;
+
+// Loads the high score from a file (if it exists)
+void load_high_score() {
+    // Try to open file in read mode
+    FILE *file = fopen("highscore.txt", "r");
+
+    if (file != NULL) {
+        // Read integer from file into high_score
+        fscanf(file, "%d", &high_score);
+
+        // Close file after reading
+        fclose(file);
+    }
+}
+
+// Saves the current high score to a file
+void save_high_score() {
+    // Open file in write mode
+    FILE *file = fopen("highscore.txt", "w");
+
+    if (file != NULL) {
+        // Write the high score value into the file
+        fprintf(file, "%d", high_score);
+
+        // Close the file after writing
+        fclose(file);
+    }
+} 
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Linked list operations
 // Implement all four functions below. The rest of the game depends on them.
@@ -304,6 +335,9 @@ void init_game(void) {
 void start_game(SDL_Renderer *renderer) {
     init_game();
 
+    // Load save high score at the start of a game
+    load_high_score();
+
     Uint32 last_update = SDL_GetTicks();
 
     while (!(state.flags & FLAG_GAME_OVER)) {
@@ -319,6 +353,14 @@ void start_game(SDL_Renderer *renderer) {
 
         render_game(renderer, &snake, &food, &state, obstacles);
         SDL_Delay(10);
+    }
+
+    // Check if current score beats high score
+    if (state.score > high_score) {
+        high_score = state.score;
+
+        // Save new high score to file
+        save_high_score();
     }
 
     // TODO: display a game-over screen and wait for a restart or quit input.
