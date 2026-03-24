@@ -203,7 +203,7 @@ void reset_snake(void) {
     snake_free();
     snake.dx = 1;  snake.dy = 0;
     snake.next_dx = 1; snake.next_dy = 0;
-
+    state.speed_ms = 150;
     // TODO: add 3 segments using snake_add_head()
     //       Start from the rearmost segment and work forward so the list
     //       ends with the head at (GRID_COLS/2, GRID_ROWS/2).
