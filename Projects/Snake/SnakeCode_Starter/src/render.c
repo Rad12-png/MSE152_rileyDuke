@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include "render.h"
 
+extern int high_score;
+
 static TTF_Font *font_lg = NULL;   // titles
 static TTF_Font *font_sm = NULL;   // HUD / hints
 
@@ -186,9 +188,17 @@ static void render_game_over(SDL_Renderer *r, const GameState *state) {
     char buf[48]; //buffer to hold score string
     draw_text_centered(r, font_lg, "GAME OVER",          mid - 60, red); //GAME OVER in red above center
     snprintf(buf, sizeof(buf), "Final Score: %d", state->score); //format and draw the final score in white
+
+    // Create string for high score
+    char high_buf[48];
+    snprintf(high_buf, sizeof(high_buf), "High Score: %d", high_score);
+
+    // Draw high score below final score
+    draw_text_centered(r, font_sm, high_buf, mid + 20, white);
+
     draw_text_centered(r, font_sm, buf,                  mid - 10, white); 
-    draw_text_centered(r, font_sm, "Press R to restart", mid + 20, yellow); //draw text
-    draw_text_centered(r, font_sm, "Press ESC to quit",  mid + 44, yellow);
+    draw_text_centered(r, font_sm, "Press R to restart", mid + 60, yellow); //draw text
+    draw_text_centered(r, font_sm, "Press ESC to quit",  mid + 86, yellow);
 }
 
 // ── Main render ───────────────────────────────────────────────────────────────
