@@ -18,20 +18,28 @@ void handle_input(GameState *state, Snake *snake) {
                 // TODO: prevent a 180° reversal (e.g. can't go LEFT if currently moving RIGHT).
                 case SDLK_UP:
                 case SDLK_w:
+		  if (snake->dy != 1) {
                     snake->next_dx =  0; snake->next_dy = -1;
+		  }
                     break;
                 case SDLK_DOWN:
                 case SDLK_s:
+		  if (snake->dy != -1){
                     snake->next_dx =  0; snake->next_dy =  1;
-                    break;
+		  }
+ 		    break;
                 case SDLK_LEFT:
                 case SDLK_a:
+		  if(snake->dx != 1){
                     snake->next_dx = -1; snake->next_dy =  0;
-                    break;
+		  }
+		    break;
                 case SDLK_RIGHT:
                 case SDLK_d:
+		  if(snake->dx != -1){
                     snake->next_dx =  1; snake->next_dy =  0;
-                    break;
+		  }
+  		    break;
 
                 // Toggle pause with P
                 case SDLK_p:
