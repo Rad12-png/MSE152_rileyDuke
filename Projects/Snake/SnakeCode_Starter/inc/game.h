@@ -12,6 +12,7 @@
 #define HUD_HEIGHT     40
 #define WINDOW_WIDTH   (GRID_COLS * CELL_SIZE)
 #define WINDOW_HEIGHT  (GRID_ROWS * CELL_SIZE + HUD_HEIGHT)
+#define MAX_OBSTACLES  50
 
 // ── Game state bitwise flags ──────────────────────────────────────────────────
 // Pack multiple boolean states into a single uint8_t using bitwise operations.
@@ -54,6 +55,14 @@ typedef struct {
     int speed_ms;     // milliseconds between physics updates (lower = faster)
 } GameState;
 
+// ── Obstacles ─────────────────────────────────────────────────────────────────
+// made by riley
+typedef struct {
+    int x;
+    int y;
+    int is_active;
+}Obstacle;
+
 // ── Input queue — circular buffer (Enhancement) ───────────────────────────────
 // Stores a sequence of direction inputs so fast keypresses are never dropped.
 #define INPUT_QUEUE_SIZE 4
@@ -70,7 +79,8 @@ extern Snake      snake;
 extern Food       food;
 extern GameState  state;
 extern InputQueue input_queue;
-
+extern Obstacle obstacles[MAX_OBSTACLES];
+extern int num_obstacles;
 // ── Function declarations ─────────────────────────────────────────────────────
 void      start_game(SDL_Renderer *renderer);
 void      init_game(void);
