@@ -13,6 +13,19 @@ extern int high_score;
 static TTF_Font *font_lg = NULL;   // titles
 static TTF_Font *font_sm = NULL;   // HUD / hints
 
+// main menu
+const char *main_menu[] = {
+	"Start Game",
+	"Quit"
+};
+
+//pause screen
+const char *pause_menu[] = {
+	"Resume",
+	"Restart",
+	"Main Menu"
+};
+
 // ── Font loading ──────────────────────────────────────────────────────────────
 
 static const char *FONT_PATHS[] = {
@@ -241,6 +254,50 @@ void render_game(SDL_Renderer *renderer, const Snake *snake,
     
     if (state->flags & FLAG_GAME_OVER)
         render_game_over(renderer, state); //prints game over screen
+
+    //main menu render
+    if (state->flags & FLAG_MENU) {
+        SDL_Color white  = {230, 230, 230, 255}; //colors
+    	SDL_Color yellow = {220, 200,  50, 255};
+	// dim background
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+        SDL_Rect overlay = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+        SDL_RenderFillRect(renderer, &overlay);
+
+        draw_text_centered(renderer, font_lg, "SNAKE GAME", 100, white);
+
+        for (int i = 0; i < MAIN_MENU_SIZE; i++) {
+            char buffer[64];
+            if (i == state->menu_index)
+                sprintf(buffer, "> %s <", main_menu[i]);
+            else
+                sprintf(buffer, "  %s", main_menu[i]);
+		SDL_Color col = (i == state->menu_index) ? yellow : white;
+            draw_text_centered(renderer, font_sm, buffer, 200 + i * 40, col);
+        }
+    }
+
+    //pause menu 
+    if (state->flags & FLAG_PAUSED) {
+	SDL_Color white  = {230, 230, 230, 255}; //colors
+    	SDL_Color yellow = {220, 200,  50, 255};
+        // dim background
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+        SDL_Rect overlay = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+        SDL_RenderFillRect(renderer, &overlay);
+
+        draw_text_centered(renderer, font_lg, "PAUSED", 100, white);
+
+        for (int i = 0; i < PAUSE_MENU_SIZE; i++) {
+            char buffer[64];
+            if (i == state->menu_index)
+                sprintf(buffer, "> %s <", pause_menu[i]);
+            else
+                sprintf(buffer, "  %s", pause_menu[i]);
+		SDL_Color col = (i == state->menu_index) ? yellow : white;
+            draw_text_centered(renderer, font_sm, buffer, 200 + i * 40, col);
+        }
+    }
 
     SDL_RenderPresent(renderer);
 }
