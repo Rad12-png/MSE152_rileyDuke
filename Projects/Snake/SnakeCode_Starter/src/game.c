@@ -248,35 +248,70 @@ void reset_snake(void) {
          snake_add_head(GRID_COLS/2,     GRID_ROWS/2);  // head (puts segment in center)
 }
 
+// Check if a coordinate is adjacent to any existing active obstacle
+// this allows us to keep the obstacles from cluttering and potentially blocking off part of the map
+
+int is_near_obstacle(int x, int y, int current_count){
+	for(int i = 0; i < current_count; i++){
+		if(!obstacles[i].is_active) continue;
+
+		// check the 3x3 area around obstacle
+		if (abs(obstacles[i].x - x) <= 1 && abs(obstacles[i].y - y) <= 1){
+			return 1;
+		}
+	}
+	return 0;
+}
+
 // spawn_obstacles - pick random coordinates, checks to ensure the wall doesn't spawn on the snake or other obstacles
 
 void spawn_obstacles(void){
-	int rx = 0, ry = 0;
+
+	// make sure max obstacles is respected
+	if(num_obstacles > MAX_OBSTACLES){
+		num_obstacles = MAX_OBSTACLES;
+	}
+
+	// reset all the obstacles
+	for(int i = 0; i < MAX_OBSTACLES; i++) obstacles[i].is_active = 0;
+
 	for(int i = 0; i < num_obstacles; i++){
+		int rx = 0, ry = 0;
 		int valid = 0;
-		while(!valid){
+		int attempts = 0; // variable to keep track of loops to prevent infinite loops
+
+		while(!valid && attempts  < 100){
+			attempts++;
 			rx = rand() % GRID_COLS;
 			ry = rand() % GRID_ROWS;
 			valid = 1;
-		
-		// don't spawn on the initial snake (middle row)
-		if (ry == GRID_ROWS / 2 && rx >= (GRID_COLS / 2 - 5) && rx <= (GRID_COLS / 2 + 5)){
-			valid = 0;
-			continue;
-		}
 
-		// dont spawn on top of another obstacle
-		for(int j = 0; j < i; j++){
-			if (obstacles[j].x == rx && obstacles[j].y == ry){
+			// don't spawn on the initial snake (middle row)
+			if (ry == GRID_ROWS / 2 && rx >= (GRID_COLS / 2 - 5) && rx <= (GRID_COLS / 2 + 5)){
 				valid = 0;
-				break;
+				continue;
+			}
+
+			// don't spawn on the food
+			if(food.is_active && rx == food.x && ry == food.y){
+				valid = 0;
+				continue;
+			}
+
+			// dont spawn on or next to another obstacle
+			if(is_near_obstacle(rx, ry, i)){
+				valid = 0;
+				continue;
 			}
 		}
+
+		if(valid){
+		obstacles[i].x = rx;
+		obstacles[i].y = ry;
+		obstacles[i].is_active = 1;
 		}
-	obstacles[i].x = rx;
-	obstacles[i].y = ry;
-	obstacles[i].is_active = 1;
 	}
+
 }
 
 /*
