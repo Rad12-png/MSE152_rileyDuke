@@ -97,7 +97,7 @@ static void render_hud(SDL_Renderer *r, const GameState *state) {
     SDL_SetRenderDrawColor(r, 45, 45, 45, 255);
     SDL_RenderDrawLine(r, 0, HUD_HEIGHT - 1, WINDOW_WIDTH, HUD_HEIGHT - 1);
 
-    char buf[48];
+    char buf[64];
     SDL_Color white = {230, 230, 230, 255};
     SDL_Color red   = {210,  70,  70, 255};
 
@@ -105,7 +105,9 @@ static void render_hud(SDL_Renderer *r, const GameState *state) {
         int th = TTF_FontHeight(font_sm);
         int ty = (HUD_HEIGHT - th) / 2;
 
-        snprintf(buf, sizeof(buf), "SCORE %d", state->score);
+	// display score and level
+        snprintf(buf, sizeof(buf), "LEVEL %d | GOAL %d/%d | TOTAL: %d",
+		 state->level, state->score, state->target_score, state->total_score);
         draw_text(r, font_sm, buf, 12, ty, white);
 
         snprintf(buf, sizeof(buf), "LIVES %d", state->lives);
@@ -204,7 +206,7 @@ static void render_game_over(SDL_Renderer *r, const GameState *state) {
 
     char buf[48]; //buffer to hold score string
     draw_text_centered(r, font_lg, "GAME OVER",          mid - 60, red); //GAME OVER in red above center
-    snprintf(buf, sizeof(buf), "Final Score: %d", state->score); //format and draw the final score in white
+    snprintf(buf, sizeof(buf), "Final Score: %d", state->total_score); //format and draw the final score in white
 
     // Create string for high score
     char high_buf[48];

@@ -349,19 +349,37 @@ void spawn_food(void) {
     // TODO: walk the snake list; if the chosen cell is occupied, pick again.
 }
 
+void init_level(void){
+
+	// increase obstacles by 5 per level, but cap at MAX_OBSTACLES
+	num_obstacles = 10 + (state.level -1) * 5;
+	if(num_obstacles > MAX_OBSTACLES) {
+		num_obstacles = MAX_OBSTACLES;
+	}
+
+	// increase target score by 2 per level
+	state.target_score = 10 + (state.level - 1) * 2;
+	state.score = 0;
+
+	reset_snake();
+	spawn_obstacles();
+	spawn_food();
+}
+
+
 void init_game(void) {
     srand((unsigned int)SDL_GetTicks());
     state.flags    = FLAG_STARTED;
     state.score    = 0;
-    state.lives    = 3;
+    state.total_score = 0;
+    state.lives    = 1;
+    state.level    = 1; 
     state.speed_ms = 150;
     snake.head = NULL;
     snake.tail = NULL;
     snake.length = 0;
     input_queue.head = input_queue.tail = input_queue.count = 0;
-    reset_snake();
-    spawn_obstacles();
-    spawn_food();
+    init_level(); 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -391,8 +409,8 @@ void start_game(SDL_Renderer *renderer) {
     }
 
     // Check if current score beats high score
-    if (state.score > high_score) {
-        high_score = state.score;
+    if (state.total_score > high_score) {
+        high_score = state.total_score;
 
         // Save new high score to file
         save_high_score();
