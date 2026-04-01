@@ -1,7 +1,8 @@
+
 // input.c
 #include <SDL2/SDL.h>
 #include "input.h"
-
+#include "render.h"
 void handle_input(GameState *state, Snake *snake) {
     SDL_Event event;
 
@@ -32,13 +33,17 @@ void handle_input(GameState *state, Snake *snake) {
                 }
 
                 if (key == SDLK_RETURN) { //if return key is pressed
-                    state->flags &= ~(FLAG_MENU | FLAG_GAME_OVER); 
-                    state->flags |= FLAG_STARTED;
-                }else if (state->menu_index == 1) { //quit
-		    state->flags |= FLAG_GAME_OVER;
-		}
-            }
-
+		    if(state->menu_index == 0) {
+		       state->flags &= ~(FLAG_MENU | FLAG_GAME_OVER); 
+                       state->flags |= FLAG_STARTED;
+                }else if (state->menu_index == 1) { // quit
+		   snake_free();
+    		   render_cleanup();
+    		   SDL_Quit();
+    		   exit(0);
+            	}
+	    }
+	    }
             // game over screen
             if (state->flags & FLAG_GAME_OVER) {
 
