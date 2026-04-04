@@ -10,6 +10,9 @@ Snake      snake;
 Food       food;
 GameState  state;
 InputQueue input_queue;
+// constants for obstacles - rad12
+Obstacle obstacles[MAX_OBSTACLES];
+int num_obstacles = 10;
 
 // Stores the highest score across game sessions
 int high_score = 0;
@@ -245,31 +248,140 @@ void reset_snake(void) {
          snake_add_head(GRID_COLS/2,     GRID_ROWS/2);  // head (puts segment in center)
 }
 
+// Check if a coordinate is adjacent to any existing active obstacle
+// this allows us to keep the obstacles from cluttering and potentially blocking off part of the map
+
+int is_near_obstacle(int x, int y, int current_count){
+	for(int i = 0; i < current_count; i++){
+		if(!obstacles[i].is_active) continue;
+
+		// check the 3x3 area around obstacle
+		if (abs(obstacles[i].x - x) <= 1 && abs(obstacles[i].y - y) <= 1){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// spawn_obstacles - pick random coordinates, checks to ensure the wall doesn't spawn on the snake or other obstacles
+
+void spawn_obstacles(void){
+
+	// make sure max obstacles is respected
+	if(num_obstacles > MAX_OBSTACLES){
+		num_obstacles = MAX_OBSTACLES;
+	}
+
+	// reset all the obstacles
+	for(int i = 0; i < MAX_OBSTACLES; i++) obstacles[i].is_active = 0;
+
+	for(int i = 0; i < num_obstacles; i++){
+		int rx = 0, ry = 0;
+		int valid = 0;
+		int attempts = 0; // variable to keep track of loops to prevent infinite loops
+
+		while(!valid && attempts  < 100){
+			attempts++;
+			rx = rand() % GRID_COLS;
+			ry = rand() % GRID_ROWS;
+			valid = 1;
+
+			// don't spawn on the initial snake (middle row)
+			if (ry == GRID_ROWS / 2 && rx >= (GRID_COLS / 2 - 5) && rx <= (GRID_COLS / 2 + 5)){
+				valid = 0;
+				continue;
+			}
+
+			// don't spawn on the food
+			if(food.is_active && rx == food.x && ry == food.y){
+				valid = 0;
+				continue;
+			}
+
+			// dont spawn on or next to another obstacle
+			if(is_near_obstacle(rx, ry, i)){
+				valid = 0;
+				continue;
+			}
+		}
+
+		if(valid){
+		obstacles[i].x = rx;
+		obstacles[i].y = ry;
+		obstacles[i].is_active = 1;
+		}
+	}
+
+}
+
 /*
  * spawn_food — place food at a random unoccupied grid cell.
  *
  * The current implementation picks a random cell without checking for the
  * snake. TODO: improve it so food never spawns inside the snake body.
  */
+
 void spawn_food(void) {
-    food.x = rand() % GRID_COLS;
-    food.y = rand() % GRID_ROWS;
-    food.is_active = 1;
+	int valid = 0;
+	while(!valid){ 
+   		food.x = rand() % GRID_COLS;
+    		food.y = rand() % GRID_ROWS;
+   		valid = 1;
+
+		// check collision with snake
+		for(Segment *s = snake.head; s; s = s->next){
+			if(s->x == food.x && s->y == food.y){
+				valid = 0;
+				break;
+			}
+		}
+		if (!valid) continue;
+
+		// check collision with obstacles
+		for (int i = 0; i < num_obstacles; i++){
+			if(obstacles[i].is_active && obstacles[i].x == food.x && obstacles[i].y == food.y){
+				valid = 0;
+				break;
+			}
+		}
+	}
+	food.is_active = 1;
     // TODO: walk the snake list; if the chosen cell is occupied, pick again.
 }
 
+void init_level(void){
+
+	// increase obstacles by 5 per level, but cap at MAX_OBSTACLES
+	num_obstacles = 10 + (state.level -1) * 5;
+	if(num_obstacles > MAX_OBSTACLES) {
+		num_obstacles = MAX_OBSTACLES;
+	}
+
+	// increase target score by 2 per level
+	state.target_score = 10 + (state.level - 1) * 2;
+	state.score = 0;
+
+	reset_snake();
+	spawn_obstacles();
+	spawn_food();
+}
+
+
 void init_game(void) {
+    snake_free();
+    state.menu_index = 0; //initialize  menu index
     srand((unsigned int)SDL_GetTicks());
-    state.flags    = FLAG_STARTED;
+    state.flags    = FLAG_MENU;
     state.score    = 0;
-    state.lives    = 3;
+    state.total_score = 0;
+    state.lives    = 1;
+    state.level    = 1; 
     state.speed_ms = 150;
     snake.head = NULL;
     snake.tail = NULL;
     snake.length = 0;
     input_queue.head = input_queue.tail = input_queue.count = 0;
-    reset_snake();
-    spawn_food();
+    init_level(); 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -294,13 +406,13 @@ void start_game(SDL_Renderer *renderer) {
             last_update = now;
         }
 
-        render_game(renderer, &snake, &food, &state);
+        render_game(renderer, &snake, &food, &state, obstacles);
         SDL_Delay(10);
     }
 
     // Check if current score beats high score
-    if (state.score > high_score) {
-        high_score = state.score;
+    if (state.total_score > high_score) {
+        high_score = state.total_score;
 
         // Save new high score to file
         save_high_score();
@@ -330,7 +442,7 @@ void start_game(SDL_Renderer *renderer) {
 		return;
 		}
         }
-        render_game(renderer, &snake, &food, &state); //keep game over screen until input is sent
+        render_game(renderer, &snake, &food, &state, obstacles); //keep game over screen until input is sent
         SDL_Delay(10); //small delay
     }
     snake_free();

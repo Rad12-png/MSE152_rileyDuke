@@ -13,6 +13,19 @@ extern int high_score;
 static TTF_Font *font_lg = NULL;   // titles
 static TTF_Font *font_sm = NULL;   // HUD / hints
 
+// main menu
+const char *main_menu[] = {
+	"Start Game",
+	"Quit"
+};
+
+//pause screen
+const char *pause_menu[] = {
+	"Resume",
+	"Restart",
+	"Main Menu"
+};
+
 // ── Font loading ──────────────────────────────────────────────────────────────
 
 static const char *FONT_PATHS[] = {
@@ -97,7 +110,7 @@ static void render_hud(SDL_Renderer *r, const GameState *state) {
     SDL_SetRenderDrawColor(r, 45, 45, 45, 255);
     SDL_RenderDrawLine(r, 0, HUD_HEIGHT - 1, WINDOW_WIDTH, HUD_HEIGHT - 1);
 
-    char buf[48];
+    char buf[64];
     SDL_Color white = {230, 230, 230, 255};
     SDL_Color red   = {210,  70,  70, 255};
 
@@ -105,7 +118,9 @@ static void render_hud(SDL_Renderer *r, const GameState *state) {
         int th = TTF_FontHeight(font_sm);
         int ty = (HUD_HEIGHT - th) / 2;
 
-        snprintf(buf, sizeof(buf), "SCORE %d", state->score);
+	// display score and level
+        snprintf(buf, sizeof(buf), "LEVEL %d | GOAL %d/%d | TOTAL: %d",
+		 state->level, state->score, state->target_score, state->total_score);
         draw_text(r, font_sm, buf, 12, ty, white);
 
         snprintf(buf, sizeof(buf), "LIVES %d", state->lives);
@@ -130,6 +145,23 @@ static void render_food(SDL_Renderer *r, const Food *food) {
         CELL_SIZE - 6, CELL_SIZE - 6
     };
     SDL_RenderFillRect(r, &rect);
+}
+
+// ── Obstacles ─────────────────────────────────────────────────────────────────
+
+static void render_obstacles(SDL_Renderer *r, const Obstacle *obstacles){
+	SDL_SetRenderDrawColor(r, 100, 100, 100, 225); // gray for walls
+
+	for(int i = 0; i < num_obstacles; i++){
+		if(obstacles[i].is_active){
+			SDL_Rect rect = {
+				obstacles[i].x * CELL_SIZE + 1,
+				HUD_HEIGHT + obstacles[i].y * CELL_SIZE + 1,
+				CELL_SIZE - 2, CELL_SIZE - 2
+			};
+			SDL_RenderFillRect(r, &rect);
+		}
+	}
 }
 
 // ── Snake — walks the linked list ─────────────────────────────────────────────
@@ -187,7 +219,7 @@ static void render_game_over(SDL_Renderer *r, const GameState *state) {
 
     char buf[48]; //buffer to hold score string
     draw_text_centered(r, font_lg, "GAME OVER",          mid - 60, red); //GAME OVER in red above center
-    snprintf(buf, sizeof(buf), "Final Score: %d", state->score); //format and draw the final score in white
+    snprintf(buf, sizeof(buf), "Final Score: %d", state->total_score); //format and draw the final score in white
 
     // Create string for high score
     char high_buf[48];
@@ -204,7 +236,7 @@ static void render_game_over(SDL_Renderer *r, const GameState *state) {
 // ── Main render ───────────────────────────────────────────────────────────────
 
 void render_game(SDL_Renderer *renderer, const Snake *snake,
-                 const Food *food, const GameState *state) {
+                 const Food *food, const GameState *state, const Obstacle *obstacles) {
     ensure_fonts();
 
     SDL_SetRenderDrawColor(renderer, 15, 15, 15, 255);
@@ -212,6 +244,9 @@ void render_game(SDL_Renderer *renderer, const Snake *snake,
 
     render_grid(renderer);
     render_hud(renderer, state);
+
+    render_obstacles(renderer, obstacles);
+
     render_food(renderer, food);
 
     if (snake->head != NULL)
@@ -221,6 +256,50 @@ void render_game(SDL_Renderer *renderer, const Snake *snake,
     
     if (state->flags & FLAG_GAME_OVER)
         render_game_over(renderer, state); //prints game over screen
+
+    //main menu render
+    if (state->flags & FLAG_MENU) {
+        SDL_Color white  = {230, 230, 230, 255}; //colors
+    	SDL_Color yellow = {220, 200,  50, 255};
+	// dim background
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+        SDL_Rect overlay = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+        SDL_RenderFillRect(renderer, &overlay);
+
+        draw_text_centered(renderer, font_lg, "SNAKE GAME", 100, white);
+
+        for (int i = 0; i < MAIN_MENU_SIZE; i++) {
+            char buffer[64];
+            if (i == state->menu_index)
+                sprintf(buffer, "> %s <", main_menu[i]);
+            else
+                sprintf(buffer, "  %s", main_menu[i]);
+		SDL_Color col = (i == state->menu_index) ? yellow : white;
+            draw_text_centered(renderer, font_sm, buffer, 200 + i * 40, col);
+        }
+    }
+
+    //pause menu 
+    if (state->flags & FLAG_PAUSED) {
+	SDL_Color white  = {230, 230, 230, 255}; //colors
+    	SDL_Color yellow = {220, 200,  50, 255};
+        // dim background
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+        SDL_Rect overlay = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+        SDL_RenderFillRect(renderer, &overlay);
+
+        draw_text_centered(renderer, font_lg, "PAUSED", 100, white);
+
+        for (int i = 0; i < PAUSE_MENU_SIZE; i++) {
+            char buffer[64];
+            if (i == state->menu_index)
+                sprintf(buffer, "> %s <", pause_menu[i]);
+            else
+                sprintf(buffer, "  %s", pause_menu[i]);
+		SDL_Color col = (i == state->menu_index) ? yellow : white;
+            draw_text_centered(renderer, font_sm, buffer, 200 + i * 40, col);
+        }
+    }
 
     SDL_RenderPresent(renderer);
 }

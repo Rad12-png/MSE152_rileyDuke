@@ -4,7 +4,9 @@
 
 #include <SDL2/SDL.h>
 #include <stdint.h>
-
+// menu sizes
+#define MAIN_MENU_SIZE 2
+#define PAUSE_MENU_SIZE 3
 // ── Grid & window configuration ───────────────────────────────────────────────
 #define CELL_SIZE      20
 #define GRID_COLS      40
@@ -12,6 +14,7 @@
 #define HUD_HEIGHT     40
 #define WINDOW_WIDTH   (GRID_COLS * CELL_SIZE)
 #define WINDOW_HEIGHT  (GRID_ROWS * CELL_SIZE + HUD_HEIGHT)
+#define MAX_OBSTACLES  50
 
 // ── Game state bitwise flags ──────────────────────────────────────────────────
 // Pack multiple boolean states into a single uint8_t using bitwise operations.
@@ -22,7 +25,8 @@
 #define FLAG_PAUSED     (1 << 1)   // game is currently paused
 #define FLAG_GAME_OVER  (1 << 2)   // player has lost all lives
 #define FLAG_WALL_WRAP  (1 << 3)   // walls wrap instead of kill (enhancement)
-
+#define FLAG_MENU       (1 << 4)   // main menu
+#define FLAG_SETTINGS   (1 << 5)   // settings screen 
 // ── Segment — one node in the snake's singly linked list ─────────────────────
 typedef struct Segment {
     int x, y;              // position in grid coordinates
@@ -50,9 +54,22 @@ typedef struct {
 typedef struct {
     uint8_t flags;    // bitwise game state (see FLAG_* above)
     int score;
+    int total_score;
     int lives;
     int speed_ms;     // milliseconds between physics updates (lower = faster)
+    int menu_index; // which option is selected
+    int level;        // track current level -rad12
+    int target_score; // score needed to pass level -rad12
+
 } GameState;
+
+// ── Obstacles ─────────────────────────────────────────────────────────────────
+// made by riley
+typedef struct {
+    int x;
+    int y;
+    int is_active;
+}Obstacle;
 
 // ── Input queue — circular buffer (Enhancement) ───────────────────────────────
 // Stores a sequence of direction inputs so fast keypresses are never dropped.
@@ -70,10 +87,12 @@ extern Snake      snake;
 extern Food       food;
 extern GameState  state;
 extern InputQueue input_queue;
-
+extern Obstacle obstacles[MAX_OBSTACLES];
+extern int num_obstacles;
 // ── Function declarations ─────────────────────────────────────────────────────
 void      start_game(SDL_Renderer *renderer);
 void      init_game(void);
+void	  init_level(void);
 void      reset_snake(void);
 void      spawn_food(void);
 

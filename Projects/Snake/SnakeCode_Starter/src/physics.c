@@ -3,6 +3,11 @@
 #include <stdio.h>
 
 void update_physics(Snake *snake, Food *food, GameState *state) {
+    //stop all movement unless game is actively runni
+    if(!(state->flags & FLAG_STARTED)) {
+	return;
+    }
+
     // Guard: linked list not yet implemented — nothing to move
     if (snake->head == NULL) return;
 
@@ -32,7 +37,8 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
 	//if wall wrap is off check if the new position is outside grid
         if (new_x < 0 || new_x >= GRID_COLS || new_y < 0 || new_y >= GRID_ROWS) {
             state->lives--; //remove a life
-            if (state->lives <= 0) { // if lost all lives
+            if (state->lives <= 0) { // if lost all live
+		state->flags &= ~FLAG_STARTED; //stop game
                 state->flags |= FLAG_GAME_OVER; //show game over screen
             } else { //if lives remain
                 reset_snake(); //reset snake to starting position
@@ -51,6 +57,7 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
         if (current->x == new_x && current->y == new_y) { //check if the head positino matches the segment position
             state->lives--; //lose a life
             if (state->lives <= 0) { //if no lives left
+		state->flags &= ~FLAG_STARTED; //stop game
                 state->flags |= FLAG_GAME_OVER; //set game over flag
             } else { //if lives remain
                 reset_snake(); //reset the snake back to the starting position
@@ -59,6 +66,22 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
         }
         current = current->next; //move to next segment in the linked list 
     } 
+
+    // ── Obstacle collision ────────────────────────────────────────────────────
+	for(int i = 0; i < num_obstacles; i++){
+		// if the node is registered as an obstacle, and the new x & y values are the same
+		if(obstacles[i].is_active && new_x == obstacles[i].x && new_y == obstacles[i].y){
+			state->lives--;
+			if(state->lives <= 0){
+				state->flags &= ~FLAG_STARTED;
+				state->flags |= FLAG_GAME_OVER;
+			}else{
+				reset_snake();
+			}
+			return;
+		}
+	}
+
     // ── Move the snake ────────────────────────────────────────────────────────
     // Add the new head position, then remove the tail (unless eating food).
     snake_add_head(new_x, new_y);
@@ -69,14 +92,20 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
 
         // increment state->score.
 	state->score++;
+	state->total_score++;
 
+	// check for level completion
+	if (state->score >= state->target_score){
+		state->level++;
+		init_level(); // reset snake and spawn new obstacles
+	}else{
+		// only spawn food if the level didn't reset
+		spawn_food();
+	}
         // increase difficulty — decrease state->speed_ms (minimum ~60).
 	if (state->speed_ms > 60) {
-	    state->speed_ms -= 5;
+	    state->speed_ms -= 3;
         }
-
-        // call spawn_food() to place new food.
-	spawn_food();
 
         printf("Score: %d\n", state->score);  // temporary — replace with HUD
     } else {
