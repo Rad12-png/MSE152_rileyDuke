@@ -84,14 +84,20 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
 
         // increment state->score.
 	state->score++;
+	state->total_score++;
 
+	// check for level completion
+	if (state->score >= state->target_score){
+		state->level++;
+		init_level(); // reset snake and spawn new obstacles
+	}else{
+		// only spawn food if the level didn't reset
+		spawn_food();
+	}
         // increase difficulty — decrease state->speed_ms (minimum ~60).
 	if (state->speed_ms > 60) {
-	    state->speed_ms -= 5;
+	    state->speed_ms -= 3;
         }
-
-        // call spawn_food() to place new food.
-	spawn_food();
 
         printf("Score: %d\n", state->score);  // temporary — replace with HUD
     } else {
