@@ -54,9 +54,13 @@ typedef struct {
 typedef struct {
     uint8_t flags;    // bitwise game state (see FLAG_* above)
     int score;
+    int total_score;
     int lives;
     int speed_ms;     // milliseconds between physics updates (lower = faster)
-    int menu_index; //which option is selected
+    int menu_index; // which option is selected
+    int level;        // track current level -rad12
+    int target_score; // score needed to pass level -rad12
+
 } GameState;
 
 // ── Obstacles ─────────────────────────────────────────────────────────────────
@@ -88,6 +92,7 @@ extern int num_obstacles;
 // ── Function declarations ─────────────────────────────────────────────────────
 void      start_game(SDL_Renderer *renderer);
 void      init_game(void);
+void	  init_level(void);
 void      reset_snake(void);
 void      spawn_food(void);
 
