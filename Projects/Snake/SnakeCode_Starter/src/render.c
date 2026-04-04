@@ -270,11 +270,14 @@ void render_game(SDL_Renderer *renderer, const Snake *snake,
 
         for (int i = 0; i < MAIN_MENU_SIZE; i++) {
             char buffer[64];
-            if (i == state->menu_index)
+
+            if (i == state->menu_index) {
                 sprintf(buffer, "> %s <", main_menu[i]);
-            else
+            } else {
                 sprintf(buffer, "  %s", main_menu[i]);
-		SDL_Color col = (i == state->menu_index) ? yellow : white;
+            }
+
+	    SDL_Color col = (i == state->menu_index) ? yellow : white;
             draw_text_centered(renderer, font_sm, buffer, 200 + i * 40, col);
         }
     }
@@ -292,11 +295,14 @@ void render_game(SDL_Renderer *renderer, const Snake *snake,
 
         for (int i = 0; i < PAUSE_MENU_SIZE; i++) {
             char buffer[64];
-            if (i == state->menu_index)
+
+            if (i == state->menu_index) {
                 sprintf(buffer, "> %s <", pause_menu[i]);
-            else
+            } else {
                 sprintf(buffer, "  %s", pause_menu[i]);
-		SDL_Color col = (i == state->menu_index) ? yellow : white;
+            }
+
+	    SDL_Color col = (i == state->menu_index) ? yellow : white;
             draw_text_centered(renderer, font_sm, buffer, 200 + i * 40, col);
         }
     }
