@@ -3,6 +3,11 @@
 #include <stdio.h>
 
 void update_physics(Snake *snake, Food *food, GameState *state) {
+    //stop all movement unless game is actively runni
+    if(!(state->flags & FLAG_STARTED)) {
+	return;
+    }
+
     // Guard: linked list not yet implemented — nothing to move
     if (snake->head == NULL) return;
 
@@ -32,7 +37,8 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
 	//if wall wrap is off check if the new position is outside grid
         if (new_x < 0 || new_x >= GRID_COLS || new_y < 0 || new_y >= GRID_ROWS) {
             state->lives--; //remove a life
-            if (state->lives <= 0) { // if lost all lives
+            if (state->lives <= 0) { // if lost all live
+		state->flags &= ~FLAG_STARTED; //stop game
                 state->flags |= FLAG_GAME_OVER; //show game over screen
             } else { //if lives remain
                 reset_snake(); //reset snake to starting position
@@ -51,6 +57,7 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
         if (current->x == new_x && current->y == new_y) { //check if the head positino matches the segment position
             state->lives--; //lose a life
             if (state->lives <= 0) { //if no lives left
+		state->flags &= ~FLAG_STARTED; //stop game
                 state->flags |= FLAG_GAME_OVER; //set game over flag
             } else { //if lives remain
                 reset_snake(); //reset the snake back to the starting position
@@ -66,6 +73,7 @@ void update_physics(Snake *snake, Food *food, GameState *state) {
 		if(obstacles[i].is_active && new_x == obstacles[i].x && new_y == obstacles[i].y){
 			state->lives--;
 			if(state->lives <= 0){
+				state->flags &= ~FLAG_STARTED;
 				state->flags |= FLAG_GAME_OVER;
 			}else{
 				reset_snake();

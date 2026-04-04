@@ -368,8 +368,10 @@ void init_level(void){
 
 
 void init_game(void) {
+    snake_free();
+    state.menu_index = 0; //initialize  menu index
     srand((unsigned int)SDL_GetTicks());
-    state.flags    = FLAG_STARTED;
+    state.flags    = FLAG_MENU;
     state.score    = 0;
     state.total_score = 0;
     state.lives    = 1;
