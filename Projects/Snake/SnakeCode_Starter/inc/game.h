@@ -4,6 +4,8 @@
 
 #include <SDL2/SDL.h>
 #include <stdint.h>
+#include <SDL2/SDL_mixer.h> // Needed for sound effects
+
 // menu sizes
 #define MAIN_MENU_SIZE 2
 #define PAUSE_MENU_SIZE 3
@@ -61,6 +63,9 @@ typedef struct {
     int level;        // track current level -rad12
     int target_score; // score needed to pass level -rad12
 
+    Mix_Chunk *eat_sound; // Sound played when food eaten
+    Mix_Chunk *die_sound; // Sound played when player dies
+
 } GameState;
 
 // ── Obstacles ─────────────────────────────────────────────────────────────────
@@ -95,6 +100,9 @@ void      init_game(void);
 void	  init_level(void);
 void      reset_snake(void);
 void      spawn_food(void);
+void      init_audio(void);
+void      cleanup_audio(void); // Frees sound effects and closes audio system
+
 
 // Linked list operations — implement these in game.c
 Segment  *create_segment(int x, int y);

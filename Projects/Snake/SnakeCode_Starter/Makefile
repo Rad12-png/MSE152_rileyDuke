@@ -17,10 +17,10 @@ UNAME := $(shell uname)
 
 ifeq ($(UNAME), Darwin)
     # ── macOS ─────────────────────────────────────────────────────────────────
-    BOTH_PC := $(shell pkg-config --exists sdl2 SDL2_ttf 2>/dev/null && echo yes)
+    BOTH_PC := $(shell pkg-config --exists sdl2 SDL2_ttf SDL2_mixer 2>/dev/null && echo yes)
     ifeq ($(BOTH_PC), yes)
-        CFLAGS  += $(shell pkg-config --cflags sdl2 SDL2_ttf)
-        LDFLAGS += $(shell pkg-config --libs   sdl2 SDL2_ttf)
+        CFLAGS  += $(shell pkg-config --cflags sdl2 SDL2_ttf SDL2_mixer)
+        LDFLAGS += $(shell pkg-config --libs   sdl2 SDL2_ttf SDL2_mixer)
     else
         BREW_SDL2 := $(shell brew --prefix sdl2     2>/dev/null)
         BREW_TTF  := $(shell brew --prefix sdl2_ttf 2>/dev/null)
@@ -33,18 +33,18 @@ ifeq ($(UNAME), Darwin)
         CFLAGS  += -I$(BREW_SDL2)/include/SDL2 -I$(BREW_TTF)/include/SDL2
         LDFLAGS += -L$(BREW_SDL2)/lib -lSDL2 -L$(BREW_TTF)/lib -lSDL2_ttf
     endif
-    DEPS_CMD = brew install sdl2 sdl2_ttf
+    DEPS_CMD = brew install sdl2 sdl2_ttf sdl2_mixer
 
 else
     # ── Linux ─────────────────────────────────────────────────────────────────
-    BOTH_PC := $(shell pkg-config --exists sdl2 SDL2_ttf 2>/dev/null && echo yes)
+    BOTH_PC := $(shell pkg-config --exists sdl2 SDL2_ttf SDL2_mixer 2>/dev/null && echo yes)
     ifeq ($(BOTH_PC), yes)
-        CFLAGS  += $(shell pkg-config --cflags sdl2 SDL2_ttf)
-        LDFLAGS += $(shell pkg-config --libs   sdl2 SDL2_ttf)
+        CFLAGS  += $(shell pkg-config --cflags sdl2 SDL2_ttf SDL2_mixer)
+        LDFLAGS += $(shell pkg-config --libs   sdl2 SDL2_ttf SDL2_mixer)
     else
         $(error SDL2 or SDL2_ttf not found — run: make deps)
     endif
-    DEPS_CMD = sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
+    DEPS_CMD = sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-mixer-dev
 
 endif
 

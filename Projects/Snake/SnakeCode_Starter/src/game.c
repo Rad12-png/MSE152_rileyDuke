@@ -10,12 +10,62 @@ Snake      snake;
 Food       food;
 GameState  state;
 InputQueue input_queue;
+
 // constants for obstacles - rad12
 Obstacle obstacles[MAX_OBSTACLES];
 int num_obstacles = 10;
 
 // Stores the highest score across game sessions
 int high_score = 0;
+
+void init_audio(void) {
+    // Remebers if audio was already set up
+    static int audio_initialized = 0;
+
+    // if audio was already initialized once, do nothing
+    if (audio_initialized) {
+        return;
+    }
+
+    // Initialize audio system (SDL_Mixer)
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        printf("Mixer error: %s\n", Mix_GetError());
+        return;
+    }
+
+    // Load eat sound from assets folder
+    state.eat_sound = Mix_LoadWAV("assets/eat.wav");
+    if (state.eat_sound == NULL) {
+        printf("Load eat error: %s\n", Mix_GetError());
+    }
+
+    // Load die sound from assets folder
+    state.die_sound = Mix_LoadWAV("assets/die.wav");
+    if (state.die_sound == NULL) {
+        printf("Load die error: %s\n", Mix_GetError());
+    }
+
+    // Mark audio as initialized so this never runs again
+    audio_initialized = 1;
+}
+
+// Free all sound resources and close audio
+void cleanup_audio(void) {
+    // Free eat sound if loaded
+    if (state.eat_sound != NULL) {
+        Mix_FreeChunk(state.eat_sound);
+        state.eat_sound = NULL;
+    }
+
+    // Free die sound if loaded
+    if (state.die_sound != NULL) {
+        Mix_FreeChunk(state.die_sound);
+        state.die_sound = NULL;
+    }
+
+    // Close SDL_Mixer audio system
+    Mix_CloseAudio();
+}
 
 // Loads the high score from a file (if it exists)
 void load_high_score() {
@@ -381,7 +431,8 @@ void init_game(void) {
     snake.tail = NULL;
     snake.length = 0;
     input_queue.head = input_queue.tail = input_queue.count = 0;
-    init_level(); 
+    init_level();
+
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -389,6 +440,9 @@ void init_game(void) {
 // ─────────────────────────────────────────────────────────────────────────────
 void start_game(SDL_Renderer *renderer) {
     init_game();
+
+    // intialize audio
+    init_audio();
 
     // Load save high score at the start of a game
     load_high_score();
@@ -427,6 +481,10 @@ void start_game(SDL_Renderer *renderer) {
         while (SDL_PollEvent(&e)) { //catches if player inputs a key
             if (e.type == SDL_QUIT) { //checks if player closed window
                 snake_free(); //free memory
+
+		cleanup_audio(); // clean audio 
+
+
                 render_cleanup(); //clean render before quitting
                 return;
             }
@@ -434,9 +492,12 @@ void start_game(SDL_Renderer *renderer) {
                 start_game(renderer); //restart game 
                 return;
             }
-            
+
             if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) { //if player presses esc
 		snake_free(); //free snake memory
+
+		cleanup_audio(); // Clean audio
+
 		render_cleanup(); //clean up all render operations
 		SDL_Quit(); //quit game
 		return;
@@ -446,5 +507,8 @@ void start_game(SDL_Renderer *renderer) {
         SDL_Delay(10); //small delay
     }
     snake_free();
+
+    cleanup_audio();
+
     render_cleanup();
 }

@@ -3,6 +3,8 @@
 #include <SDL2/SDL.h>
 #include "input.h"
 #include "render.h"
+#include "game.h"
+
 void handle_input(GameState *state, Snake *snake) {
     SDL_Event event;
 
@@ -38,6 +40,7 @@ void handle_input(GameState *state, Snake *snake) {
                        state->flags |= FLAG_STARTED;
                 }else if (state->menu_index == 1) { // quit
 		   snake_free();
+		   cleanup_audio();
     		   render_cleanup();
     		   SDL_Quit();
     		   exit(0);
@@ -96,7 +99,6 @@ void handle_input(GameState *state, Snake *snake) {
         		state->flags |= FLAG_MENU;
         		state->menu_index = 0;
     		}
-
     		return; // don’t let paused input fall through
 	}
 
