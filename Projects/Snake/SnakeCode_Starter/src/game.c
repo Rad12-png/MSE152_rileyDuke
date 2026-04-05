@@ -170,6 +170,8 @@ void snake_remove_tail(void) {
  *   - This must leave zero memory leaks (verify with Valgrind).
  */
 void snake_free(void) {
+    if(snake.head == NULL) return;
+
     // Start at the head of the linked list
     Segment *current = snake.head;
 
