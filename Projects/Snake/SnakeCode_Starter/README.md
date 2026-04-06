@@ -57,7 +57,7 @@ SnakeCode_Starter/
 |- Level system |- Food Spawning, eating, snake growth|- Self Collision|
 |- Fixed immediate reversal issue (180 degree self collision) |- Zero unit test valgrind errors|- Game over render with key commands|
 |- High score vs Current score (within levels) |- Persistent high score|- Main menu with wrap around logic|
-||- Eat and death sound |- Pause menu with wrap around logic|
+|- Memory leak fail safes |- Eat and death sound |- Pause menu with wrap around logic|
 
 ## All Features
 ---
