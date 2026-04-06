@@ -53,11 +53,11 @@ SnakeCode_Starter/
 
 | Riley | Levi | Aarav |
 |-------|------|-------|
-|- Random obstacle generation |- Snake body||
-|- Level system |- Food Spawning, eating, snake growth||
-|- Fixed immediate reversal issue (180 degree self collision) |- Zero unit test valgrind errors||
-|- High score vs Current score (within levels) |- Persistent high score||
-||- Eat and death sound ||
+|- Random obstacle generation |- Snake body|- Wall Collision|
+|- Level system |- Food Spawning, eating, snake growth|- Self Collision|
+|- Fixed immediate reversal issue (180 degree self collision) |- Zero unit test valgrind errors|- Game over render with key commands|
+|- High score vs Current score (within levels) |- Persistent high score|- Main menu with wrap around logic|
+||- Eat and death sound |- Pause menu with wrap around logic|
 
 ## All Features
 ---
