@@ -1,7 +1,7 @@
 # MSE 152 Snake Game Final Project
 
 ## Group 21: Levi Guan, Riley Duke, and Aarav Chaudhry
-
+## Repo: see [Snake Game](https://github.sfu.ca/lga70/MSE152_G21_Lunar.git)
 ## Requirements
 - GCC
 - SDL2
